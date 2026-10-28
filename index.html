@@ -38,6 +38,13 @@
 
   <section id="fin" class="ui">
     <p>Gracias por recorrer NOCTURNAS. <br>Siete obras nacidas en la oscuridad.</p>
+    <div id="commentBox">
+      <p class="comment-label">Si deseas, déjame tu comentario:</p>
+      <textarea id="commentText" placeholder="Escribe aquí lo que sentiste en la sala..." rows="3"></textarea>
+      <button id="sendComment" class="ghost" type="button">Enviar comentario</button>
+      <p id="commentThanks" class="comment-thanks"></p>
+    </div>
+
     <button id="again" class="ghost" type="button">Volver al inicio</button>
   </section>
 
@@ -157,6 +164,40 @@ $('#next').onclick=()=>go(idx+1);
 $('#hot').onclick=openFicha;
 $('#cont').onclick=closeFicha;
 $('#again').onclick=()=>go(0);
+$('#sendComment').onclick=async()=>{
+  const txt=$('#commentText').value.trim();
+  const thanks=$('#commentThanks');
+  const btn=$('#sendComment');
+  if(!txt){ thanks.textContent='Escribe algo primero :)'; return; }
+  btn.disabled=true;
+  thanks.textContent='Enviando...';
+  try{
+    // Envía a tu Gmail vía FormSubmit
+    const formData = new FormData();
+    formData.append('email', 'visitante@nocturnas.pages.dev');
+    formData.append('message', txt);
+    formData.append('_subject', 'Nuevo comentario en NOCTURNAS 🦇');
+    formData.append('_captcha', 'false');
+    formData.append('_template', 'table');
+
+    await fetch('https://formsubmit.co/ajax/julio.guadarrama10@gmail.com', {
+      method: 'POST',
+      body: formData
+    });
+
+    localStorage.setItem('nocturnas_comment_'+Date.now(), txt);
+    thanks.textContent='Gracias por tu comentario 🦇 Lo recibí.';
+    $('#commentText').value='';
+    setTimeout(()=>thanks.textContent='', 5000);
+  }catch(e){
+    // Fallback local si falla el envío
+    try{ localStorage.setItem('nocturnas_comment_'+Date.now(), txt); }catch(_){}
+    thanks.textContent='Gracias 🖤 (guardado local, revisa tu correo luego)';
+  }
+  btn.disabled=false;
+};
+
+
 const heartEl=$('#heart'); if(heartEl){ heartEl.onclick=e=>{const h=e.currentTarget;h.classList.toggle('liked');h.textContent=h.classList.contains('liked')?'♥':'♡'}; }
 $('#snd').onclick=e=>{ muted=!muted; vids.forEach(v=>{ v.muted = muted || SCENES[idx].sound === false; v.volume=1; }); e.currentTarget.textContent=muted?'Sound off':'Sound on'; };
 addEventListener('keydown',e=>{if(e.key==='Escape')closeFicha()});
