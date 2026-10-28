@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>NOCTURNAS - Galería de Arte</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="stage">
+  <video id="va" playsinline preload="metadata"></video>
+  <video id="vb" playsinline preload="metadata"></video>
+  <div id="count" class="ui"></div>
+  <button id="snd" class="ui ghost on" type="button">Sound on</button>
+
+  <div id="lobbyIntro" class="ui">
+    Dentro habitan 7 obras nacidas en la oscuridad.<br>
+    <span style="padding-top: 10px;"><strong>¿Te atreves a entrar?</strong></span>
+  </div>
+  <button id="enter" class="ui plate" type="button">Entrar</button>
+
+  <button id="hot" class="ui" type="button" aria-label="Ver la ficha de la obra"></button>
+  <p id="tip" class="ui">Toca el cuadro para ver su ficha</p>
+  <button id="next" class="ui ghost" type="button">Siguiente</button>
+
+  <section id="ficha" aria-label="Ficha de la obra">
+    <img id="fi" alt="" hidden onerror="this.hidden=true">
+    <h2 id="ft"></h2>
+    <p class="frase" id="ff"></p>
+    <p class="meta" id="fm"></p>
+    <button id="cont" class="plate" type="button">Continuar</button>
+  </section>
+
+  <section id="fin" class="ui">
+    <p>Gracias por recorrer mi galería de arte inspirada en la Noche de Brujas.</p>
+    <button id="again" class="ghost" type="button">Volver al inicio</button>
+  </section>
+
+  <section id="gate" class="ui on">
+    <span class="eyebrow">Galería de Arte</span>
+    <h1>NOCTURNAS</h1>
+    <p>Dibujos en tinta china.<br>La visita tiene sonido.</p>
+    <button id="start" class="plate" type="button">Comenzar</button>
+  </section>
+  <p id="msg"></p>
+</div>
+<script>
+const SCENES=[
+  {id:'lobby',src:'videos/01-lobby-loop.mp4',loop:true,sound:true},
+  {id:'puerta',src:'videos/02-puerta.mp4',sound:true,auto:true},
+  {id:'luces',src:'videos/02-lights.mp4',sound:true,auto:true},
+  {id:'obra1',src:'videos/03-obra1.mp4',loop:true,sound:true,obra:{titulo:'Selina',frase:'la ladrona de Gotham que debutó como «la Gata» en 1940. Ni heroína ni villana del todo, con un vínculo de amor y rivalidad con Batman.',tecnica:'Tinta china sobre papel de 200 gr, 29.7 x 42 cm, 2026',artista:'Julio Guadarrama',img:'imgs/obra1.png',hot:[19,23,66,55]}},
+  {id:'entrada2',src:'videos/04-entrada.mp4',sound:true,auto:true},
+  {id:'luces2',src:'videos/05-lights.mp4',sound:true,auto:true},
+  {id:'obra2',src:'videos/05-obra2.mp4',loop:true,sound:true,obra:{titulo:'Girl Vampire No.1',frase:'Una joven vampira que mira de lado mientras su cabello se deshace en tinta negra.',tecnica:'Tinta china sobre papel de 200 gr, 29.7 x 42 cm, 2026',artista:'Julio Guadarrama',img:'imgs/obra2.png',hot:[19,23,66,55]}},
+  {id:'salidaEntrada3',src:'videos/05-salida-entrada.mp4',sound:true,auto:true},
+  {id:'obra3',src:'videos/06-obra3.mp4',loop:true,sound:true,obra:{titulo:'Kitanna',frase:'Frase de la obra 3 aquí.',tecnica:'Tinta china sobre papel de 200 gr, 29.7 x 42 cm, 2026',artista:'Julio Guadarrama',img:'imgs/obra3.png',hot:[19,23,66,55]}},
+  {id:'salidaEntrada4',src:'videos/06-salida-entrada.mp4',sound:true,auto:true},
+  {id:'obra4',src:'videos/07-obra4.mp4',loop:true,sound:true,obra:{titulo:'Vampirella',frase:'Frase de la obra 4 aquí.',tecnica:'Tinta china sobre papel de 200 gr, 29.7 x 42 cm, 2026',artista:'Julio Guadarrama',img:'imgs/obra4.png',hot:[19,23,66,55]}},
+  {id:'salidaEntrada5',src:'videos/07-entrada-salida.mp4',sound:true,auto:true},
+  {id:'obra5',src:'videos/08-obra5.mp4',loop:true,sound:true,obra:{titulo:'Witchblade',frase:'Un guantelete con voluntad propia que decide quién porta su poder. Hoy lo lleva la detective Sara Pezzini.',tecnica:'Tinta china sobre papel de 200 gr, 29.7 x 42 cm, 2026',artista:'Julio Guadarrama',img:'imgs/obra5.png',hot:[19,23,66,55]}},
+  {id:'salidaEntrada6',src:'videos/08-salida-entrada.mp4',sound:true,auto:true},
+  {id:'obra6',src:'videos/09-obra6.mp4',loop:true,sound:true,obra:{titulo:'Pamela Isley',frase:'botánica de Gotham, controla toda la vida vegetal y defiende la naturaleza frente a la humanidad',tecnica:'Tinta china sobre papel de 200 gr, 29.7 x 42 cm, 2026',artista:'Julio Guadarrama',img:'imgs/obra6.png',hot:[19,23,66,55]}},
+  {id:'salidaEntrada7',src:'videos/09-entrada-salida.mp4',sound:true,auto:true},
+  {id:'salaFinal',src:'videos/10-sala-final.mp4',loop:true,sound:true,obra:{titulo:'Lyra',frase:'La última guardiana de la Sala de las Sombras. Su mirada cierra el recorrido.',tecnica:'Tinta china sobre papel de 200 gr, 29.7 x 42 cm, 2026',artista:'Julio Guadarrama',img:'imgs/obra7.png',hot:[19,23,66,55]}}
+];
+
+const $=s=>document.querySelector(s),vids=[$('#va'),$('#vb')];
+const show=s=>$(s).classList.add('on'),hide=(...a)=>a.forEach(s=>$(s).classList.remove('on'));
+const total=SCENES.filter(s=>s.obra).length;
+let front=0,idx=0,muted=false,slot=[-1,-1],timer;
+
+function msg(t){const m=$('#msg');m.textContent=t;m.classList.add('on');setTimeout(()=>m.classList.remove('on'),4500)}
+
+function prep(i){
+  const s=SCENES[i];if(!s)return null;
+  const b=1-front,v=vids[b];
+  const shouldMute = muted || s.sound === false;
+  if(slot[b]!==i){
+    v.onended=v.onerror=null; v.pause();
+    v.preload='auto';
+    v.src=s.src; v.loop=!!s.loop; v.muted=shouldMute; v.volume=1; v.load(); slot[b]=i;
+  } else { v.muted=shouldMute; v.volume=1; }
+  return v;
+}
+
+function showUI(s){
+  if(s.id==='lobby'){show('#enter');show('#lobbyIntro');return}
+  if(s.obra){
+    const [x,y,w,h]=s.obra.hot;
+    Object.assign($('#hot').style,{left:x+'%',top:y+'%',width:w+'%',height:h+'%'});
+    // Si es la última obra (Lyra), el botón dice Salir
+    const isLast = s.id==='salaFinal';
+    $('#next').textContent = isLast ? 'Salir' : 'Siguiente';
+    show('#hot');show('#tip');show('#next');return
+  }
+  if(s.id==='salaFinal'){ $('#next').textContent='Salir'; show('#next');return}
+  if(s.hold){ $('#next').textContent='Siguiente'; show('#next');return}
+  if(false){
+    const [x,y,w,h]=s.obra.hot;
+    Object.assign($('#hot').style,{left:x+'%',top:y+'%',width:w+'%',height:h+'%'});
+    show('#hot');show('#tip');show('#next');
+  }
+}
+
+async function go(i){
+  clearTimeout(timer);
+  idx=i;
+  hide('#enter','#lobbyIntro','#hot','#tip','#next','#count','#fin');
+  closeFicha();
+  const s=SCENES[i];
+  if(!s){show('#fin'); vids.forEach(v=>{v.pause(); v.muted=true;}); return}
+  const v=prep(i),old=vids[front],b=1-front;
+
+  if(old){
+    old.muted=true;
+    old.pause();
+  }
+
+  v.onended=()=>{ if(!s.loop){ s.auto?go(i+1):showUI(s) } };
+  v.onerror=()=>{msg('No encuentro '+s.src);showUI(s)};
+  v.muted = muted || s.sound === false; v.volume=1;
+
+  try{await v.play()}catch(e){ if(!v.muted){ v.muted=true; try{await v.play()}catch(_){} } }
+
+  v.classList.add('on');
+  old.classList.remove('on');
+  front=b;
+  slot[front]=i;
+  slot[1-front]=-1;
+
+  if(s.obra){
+    const n=SCENES.slice(0,i+1).filter(x=>x.obra).length;
+    $('#count').textContent='Obra '+n+' de '+total;show('#count');
+    timer=setTimeout(()=>showUI(s),1200);
+  }else if(s.id==='salaFinal'){
+    timer=setTimeout(()=>showUI(s),1200);
+  }else if(s.hold){
+    timer=setTimeout(()=>showUI(s),3000);
+  }else if(s.id==='lobby'){
+    showUI(s);
+  }
+
+  setTimeout(()=>{prep(i+1)},700);
+}
+
+function openFicha(){ const o=SCENES[idx].obra; if(!o)return; $('#ft').textContent=o.titulo; $('#ff').textContent=o.frase; $('#fm').textContent=o.tecnica+'. '+o.artista; const im=$('#fi');im.hidden=!o.img;if(o.img){im.src=o.img;im.alt=o.titulo} $('#ficha').classList.add('on'); }
+function closeFicha(){ $('#ficha').classList.remove('on') }
+
+$('#enter').onclick=()=>go(1);
+$('#next').onclick=()=>go(idx+1);
+$('#hot').onclick=openFicha;
+$('#cont').onclick=closeFicha;
+$('#again').onclick=()=>go(0);
+const heartEl=$('#heart'); if(heartEl){ heartEl.onclick=e=>{const h=e.currentTarget;h.classList.toggle('liked');h.textContent=h.classList.contains('liked')?'♥':'♡'}; }
+$('#snd').onclick=e=>{ muted=!muted; vids.forEach(v=>{ v.muted = muted || SCENES[idx].sound === false; v.volume=1; }); e.currentTarget.textContent=muted?'Sound off':'Sound on'; };
+addEventListener('keydown',e=>{if(e.key==='Escape')closeFicha()});
+prep(0);
+$('#start').onclick=()=>{hide('#gate');go(0)};
+</script>
+</body>
+</html>
