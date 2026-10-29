@@ -47,6 +47,9 @@ video.on{opacity:1}
 .meta{font-size:var(--fs-ficha-meta);line-height:1.6;color:rgba(239,230,210,.8);margin-bottom:2.2rem;text-align:center}
 #cont{margin-top:1.2rem;display:block;width:100%;}
 #fin{inset:0;z-index:4;background:rgba(8,6,4,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1.1rem;padding:2rem;font-size:1.35rem}
+#commentBox{width:min(100%,34rem)}
+#commentText{display:block;width:100%;min-height:6rem;margin-top:.5rem;padding:.65rem;font:inherit;color:var(--bone);background:rgba(10,8,6,.75);border:1px solid rgba(201,164,92,.55);resize:vertical}
+#sendComment{display:block;margin:.75rem auto 0}
 #heart{font-size:3.2rem;background:none;border:0;color:var(--rose);cursor:pointer}
 #msg{position:absolute;left:5%;right:5%;top:12%;z-index:6;text-align:center;background:rgba(0,0,0,.75);padding:.6rem .8rem;opacity:0;pointer-events:none}
 #msg.on{opacity:1}
