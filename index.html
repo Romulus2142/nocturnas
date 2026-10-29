@@ -40,7 +40,7 @@
     <p>Gracias por recorrer NOCTURNAS. <br>Siete obras nacidas en la oscuridad.</p>
     <div id="commentBox">
       <p class="comment-label">Si deseas, déjame tu comentario:</p>
-      <textarea id="commentText" placeholder="Escribe aquí lo que sentiste en la sala..." rows="3"></textarea>
+      <textarea id="commentText" placeholder="Escribe aquí tu comentario..." rows="3"></textarea>
       <button id="sendComment" class="ghost" type="button">Enviar comentario</button>
       <p id="commentThanks" class="comment-thanks"></p>
     </div>
@@ -101,7 +101,7 @@ function showUI(s){
   if(s.obra){
     const [x,y,w,h]=s.obra.hot;
     Object.assign($('#hot').style,{left:x+'%',top:y+'%',width:w+'%',height:h+'%'});
-    // Si es la última obra (Lyra), el botón dice Salir
+  
     const isLast = s.id==='salaFinal';
     $('#next').textContent = isLast ? 'Salir' : 'Siguiente';
     show('#hot');show('#tip');show('#next');return
